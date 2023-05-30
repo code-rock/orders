@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-
-	// "io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -70,30 +68,6 @@ func Subscribe(fun func(order order.SOrderTable), saveСache func(order SOrder))
 				ID:  order_new.OrderUID,
 				Bin: msg.Data})
 		}
-
-		// log.Printf("%10s | %s\n", msg.Subject, string(msg.Data))
-		// log.Println(msg.Data)
-		// log.Println(msg.Subject)
-		// var order SOrder
-		// var orders []SOrder
-		// byteValue, _ := ioutil.ReadAll(stringData)
-		// if strings.HasPrefix(stringData, "[") && strings.HasSuffix(stringData, "]") {
-		// json.Unmarshal(msg.Data, &orders)
-		// } else if strings.HasPrefix(stringData, "{") && strings.HasSuffix(stringData, "}") {
-		// 	json.Unmarshal(msg.Data, &order)
-		// }
-		// var buff bytes.Buffer
-		// dec := gob.NewDecoder(&buff)
-		// fmt.Println(msg.Data)
-		// err = dec.Decode(msg.Data)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
-		fmt.Println("e2e2wegfegtjrj'")
-		// fmt.Println(order)
-		// fmt.Println("'gdfhtjrj'")
-		// fmt.Println(orders)
-		// log.Println(string(msg.Data))
 	}, stan.StartWithLastReceived())
 	if err != nil {
 		log.Fatal(err)

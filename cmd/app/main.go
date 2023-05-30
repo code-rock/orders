@@ -3,13 +3,12 @@ package main
 import (
 	envconfig "basket/internal/config"
 	"basket/internal/database/order"
+	dbOrder "basket/internal/database/order/db"
+	"basket/internal/database/postgresql"
+	web "basket/internal/web"
 	"context"
 	"encoding/json"
 	"fmt"
-
-	// "fmt"
-	dbOrder "basket/internal/database/order/db"
-	"basket/internal/database/postgresql"
 
 	streaming "basket/internal/services/nuts-streaming"
 	"log"
@@ -59,6 +58,8 @@ func main() {
 	}
 
 	streaming.Subscribe(addOrderDB, saveСache)
+
+	web.Listen()
 }
 
 func parseOrder(orders []order.SOrderTable) (orders_cache []streaming.SOrder, err error) {

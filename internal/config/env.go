@@ -22,9 +22,6 @@ type SGitHubConfig struct {
 type Config struct {
 	GitHub SGitHubConfig
 	BD     SDBConfig
-	// DebugMode bool
-	// UserRoles []string
-	// MaxUsers  int
 }
 
 func New() *Config {
@@ -40,9 +37,6 @@ func New() *Config {
 			Password: getEnv("POSTGRE_SQL_PASSWORD", ""),
 			DBName:   getEnv("POSTGRE_SQL_NAME", ""),
 		},
-		// DebugMode: getEnvAsBool("DEBUG_MODE", true),
-		// UserRoles: getEnvAsSlice("USER_ROLES", []string{"admin"}, ","),
-		// MaxUsers:  getEnvAsInt("MAX_USERS", 1),
 	}
 }
 

@@ -1,16 +1,5 @@
 package streaming
 
-import (
-	// "encoding/json"
-	"fmt"
-	// "io/ioutil"
-
-	// "fmt"
-
-	"os"
-	// "strconv"
-)
-
 type SItems struct {
 	ChrtID      int    `json:"chrt_id"`
 	TrackNumber string `json:"track_number"`
@@ -66,60 +55,4 @@ type SOrder struct {
 	Name            string    `json:"name"`
 	Login           string    `json:"login"`
 	Password        string    `json:"password"`
-}
-
-func do(i interface{}) {
-	switch i.(type) {
-	case []SOrder:
-		fmt.Printf("TwiceЭ")
-	case SOrder:
-		fmt.Printf("спспЭ")
-	default:
-		fmt.Printf("Это не похоже на закз")
-	}
-}
-
-func AddOrderHandlerFunc(message string) {
-	jsonFile, err := os.Open(message)
-	Check(err)
-
-	fmt.Println("Successfully Opened massege")
-	fmt.Println(jsonFile)
-	defer jsonFile.Close()
-	// var dat map[string]interface{}
-	// byteValue, _ := ioutil.ReadAll(jsonFile)
-
-	// if err := json.Unmarshal(byteValue, &dat); err != nil {
-	//     panic(err)
-	// }
-	// var order SOrder
-	// var orders []SOrder
-
-	// var objmap map[string]json.RawMessage
-	// err := json.Unmarshal(byteValue, &objmap)
-	// val, err := json.Unmarshal(byteValue, &order)
-
-	// err := json.Unmarshal([]byte(byteValue), &order)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// var req SOrder
-	// err := json.NewDecoder(byteValue).Decode(&req)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(req)
-	// тут у вас будет заполненная структура req
-	// for i := 0; i < len(order.Users); i++ {
-	//     fmt.Println("User Type: " + order.Users[i].Type)
-	//     fmt.Println("User Age: " + order.Itoa(users.Users[i].Age))
-	//     fmt.Println("User Name: " + users.Users[i].Name)
-	//     fmt.Println("Facebook Url: " + users.Users[i].Social.Facebook)
-	// }
-	// var req SAddOrderRequest
-	// err := json.NewDecoder(io.Reader(message)).Decode(&req)
-	// if err != nil {
-	/// ....
-	// }
-	// тут у вас будет заполненная структура req
 }

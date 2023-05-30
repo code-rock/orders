@@ -63,6 +63,15 @@ func (r *Repository) FindAll(ctx context.Context) (u []order.SOrderTable, err er
 	return orders, nil
 }
 
+// func (r *Repository) clearTable(ctx context.Context) {
+// 	q := `DELETE * FROM oreder_list;`
+
+// 	_, err := r.client.Query(ctx, q)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// }
+
 func NewRepository(client postgresql.SClient, logger interface{}) order.Repository {
 	return &Repository{
 		client: client,
