@@ -10,17 +10,14 @@ import (
 	"syscall"
 	"time"
 
-	// "basket/internal/database/postgresql"
-
-	// web "basket/internal/web"
-
 	streaming "basket/internal/services/nuts-streaming"
 	"encoding/json"
-	"fmt"
+
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/joho/godotenv"
 	"github.com/julienschmidt/httprouter"
@@ -35,13 +32,12 @@ func init() {
 
 type SPageOrder struct {
 	Id       string
-	Keys     []string
-	Selected streaming.SOrder
+	Keys     []interface{}
+	Selected interface{}
 }
 
 func main() {
-	cache := make(map[string]streaming.SOrder) //[]streaming.SOrder
-	// var cacheKeys []string
+	var cache sync.Map
 	conf := env.New()
 	ctx := context.TODO()
 
@@ -53,14 +49,15 @@ func main() {
 
 	u, err := repository.FindAll(ctx)
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Printf("%v", err)
 	} else {
-		parsed, err := parseOrder(u)
-		if err != nil {
-			log.Fatalf("%v", err)
-		} else {
-			cache = parsed
-			// cacheKeys = getKeys(cache)
+		for _, curr_order := range u {
+			var value streaming.SOrder
+			if err := json.Unmarshal(curr_order.Bin, &value); err != nil {
+				log.Printf("%v", err)
+				continue
+			}
+			cache.Store(curr_order.ID, value)
 		}
 	}
 
@@ -72,32 +69,34 @@ func main() {
 	}
 
 	saveСache := func(order streaming.SOrder) {
-		cache[order.OrderUID] = order
+		cache.Store(order.OrderUID, order)
+	}
+
+	getCacheKeys := func() (Keys []interface{}) {
+		cache.Range(func(k, v interface{}) bool {
+			Keys = append(Keys, k)
+			return true
+		})
+		return Keys
 	}
 
 	Index := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		Keys := getKeys(cache)
 		tmpl, _ := template.ParseFiles("internal/templates/home_page.html")
-		tmpl.Execute(w, Keys) // 	tmpl.Execute(w, "'dffgfdg'")
-		// fmt.Fprint(w, "Welcome!\n")
+		tmpl.Execute(w, getCacheKeys())
 	}
 
 	Hello := func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		id := ps.ByName("id")
-		val, ok := cache[id]
-		keys := getKeys(cache)
+		val, ok := cache.Load(id)
 
 		if ok {
 			data := SPageOrder{
 				Id:       id,
-				Keys:     keys,
+				Keys:     getCacheKeys(),
 				Selected: val,
 			}
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(data)
-
-			// tmpl, _ := template.ParseFiles("internal/templates/home_page.html")
-			// tmpl.Execute(w, data)
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -107,7 +106,6 @@ func main() {
 	router.GET("/", Index)
 	router.GET("/:id", Hello)
 
-	// go
 	srv := &http.Server{
 		Addr:    ":3003",
 		Handler: router,
@@ -133,7 +131,6 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
-		// extra handling here
 		cancel()
 	}()
 
@@ -142,32 +139,4 @@ func main() {
 	}
 	log.Print("Server Exited Properly")
 
-}
-
-func getKeys(obj map[string]streaming.SOrder) []string {
-	keys := []string{}
-
-	for key := range obj {
-		keys = append(keys, key)
-	}
-	fmt.Println(keys)
-	return keys
-}
-
-func parseOrder(orders []order.SOrderTable) (orders_cache map[string]streaming.SOrder, err error) {
-	parsed := make(map[string]streaming.SOrder)
-
-	for _, curr_order := range orders {
-		var value streaming.SOrder
-		if err := json.Unmarshal(curr_order.Bin, &value); err != nil {
-			fmt.Println(err)
-			continue
-		}
-		fmt.Println(curr_order.ID)
-		fmt.Println(value)
-		fmt.Println(parsed)
-		parsed[curr_order.ID] = value
-	}
-
-	return parsed, nil
 }

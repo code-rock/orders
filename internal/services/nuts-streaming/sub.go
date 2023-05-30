@@ -4,7 +4,6 @@ import (
 	order "basket/internal/database/order"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -13,8 +12,7 @@ import (
 	stan "github.com/nats-io/stan.go"
 )
 
-func Subscribe(fun func(order order.SOrderTable), saveСache func(order SOrder)) {
-	fmt.Println("ф22Э")
+func Subscribe(saveDB func(order order.SOrderTable), saveСache func(order SOrder)) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	var (
 		url        = flag.String("url", stan.DefaultNatsURL, "NATS Server URLs, separated by commas")
@@ -41,33 +39,29 @@ func Subscribe(fun func(order order.SOrderTable), saveСache func(order SOrder))
 	}
 	defer sc.Close()
 
-	// Subscribe to the basket channel as a queue.
+	saveOrder := func(new_order SOrder, msg *stan.Msg) {
+		saveСache(new_order)
+		saveDB(order.SOrderTable{
+			ID:  new_order.OrderUID,
+			Bin: msg.Data})
+	}
+
+	// Subscribe to the channel as a queue.
 	// Start with new messages as they come in; don't replay earlier messages.
 	sub, err := sc.QueueSubscribe("basket", *queueGroup, func(msg *stan.Msg) {
-		// stringData := string(msg.Data)
-		// var dat interface{}
-		fmt.Println(msg)
 		var order_new SOrder
 		var orders []SOrder
 		if err := json.Unmarshal(msg.Data, &order_new); err != nil {
-			fmt.Println(err)
+			log.Print(err)
 			if err := json.Unmarshal(msg.Data, &orders); err != nil {
-				fmt.Println(err)
+				log.Print(err)
 			} else {
-				fmt.Println(orders)
 				for _, value := range orders {
-					saveСache(value)
-					fun(order.SOrderTable{
-						ID:  value.OrderUID,
-						Bin: msg.Data})
+					saveOrder(value, msg)
 				}
 			}
 		} else {
-			fmt.Println(order_new)
-			saveСache(order_new)
-			fun(order.SOrderTable{
-				ID:  order_new.OrderUID,
-				Bin: msg.Data})
+			saveOrder(order_new, msg)
 		}
 	}, stan.StartWithLastReceived())
 	if err != nil {

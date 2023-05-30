@@ -10,42 +10,45 @@
 <style>
 
 </style>
-<script>
-    const nav = document.querySelector('.navigation')
-    nav.addEventListener('click', async(e) => {
-        e.stopPropagation()
-        e.preventDefault()
 
-        let response = await fetch(`http://localhost:3003/${e.currentTarget.textContent}`)
-        let data = await response.json();
-
-        alert(data);
-    })
-</script>
 <body class="d-flex h-100 text-center text-bg-dark">
     <div class="row align-items-start">
         <div class="col navigation">
-            {{range .}} <a href="/{{.}}">{{.}}</a> {{end}}
+            {{range .}} <a href="/{{.}}" onunload="return false">{{.}}</a> {{end}}
         </div>
         <div class="col">
             <div class="card" style="width: 18rem;">
-                <div class="card-body">
-                  <h5 class="card-title">gjhg</h5>
-                  <p class="card-text">jhkhj</p>
-                </div>
-                <ul class="list-group list-group-flush">
-                  <li class="list-group-item">An item</li>
-                  <li class="list-group-item">A second item</li>
-                  <li class="list-group-item">A third item</li>
-                </ul>
-                <div class="card-body">
-                  <a href="#" class="card-link">Card link</a>
-                  <a href="#" class="card-link">Another link</a>
-                </div>
+                
               </div>
         </div>
     </div>
- 
+    <script>
+        const nav = document.querySelector('.navigation')
+        const card = document.querySelector('.card')
+
+        nav.addEventListener('click', async(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            console.log(e.currentTarget.textContent.trim(), 'e.currentTarget.textContent')
+            let response = await fetch(`http://localhost:3003/${e.currentTarget.textContent.trim()}`)
+            let data = await response.json();
+            console.log(data,'data')
+            let ulEl = document.createElement('ul');
+            Object.values(data.Selected).forEach(item => {
+                if (item instanceof Object) {
+                    card.append(ulEl)
+                    ulEl = document.createElement('ul');
+                    ulEl.classList.add("list-group", "list-group-flush");
+                } else {
+                    let liEl = document.createElement('li');
+                    liEl.textContent = item;
+                    liEl.classList.add("list-group-item");
+                    ulEl.append(liEl)
+                }
+            })
+            card.append(ulEl)
+        })
+    </script>
    
 </body>
 </html>
