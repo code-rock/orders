@@ -10,7 +10,42 @@
 <style>
 
 </style>
+<script>
+    const nav = document.querySelector('.navigation')
+    nav.addEventListener('click', async(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+
+        let response = await fetch(`http://localhost:3003/${e.currentTarget.textContent}`)
+        let data = await response.json();
+
+        alert(data);
+    })
+</script>
 <body class="d-flex h-100 text-center text-bg-dark">
-   <p>Ключики и значения</p>
+    <div class="row align-items-start">
+        <div class="col navigation">
+            {{range .}} <a href="/{{.}}">{{.}}</a> {{end}}
+        </div>
+        <div class="col">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">gjhg</h5>
+                  <p class="card-text">jhkhj</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">An item</li>
+                  <li class="list-group-item">A second item</li>
+                  <li class="list-group-item">A third item</li>
+                </ul>
+                <div class="card-body">
+                  <a href="#" class="card-link">Card link</a>
+                  <a href="#" class="card-link">Another link</a>
+                </div>
+              </div>
+        </div>
+    </div>
+ 
+   
 </body>
 </html>

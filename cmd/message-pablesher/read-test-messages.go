@@ -12,7 +12,7 @@ func GetTestMessages(doSomething func([]byte)) {
 	dir := "./test-data"
 	files, err := ioutil.ReadDir(dir)
 	Check(err)
-	fmt.Print(files)
+	fmt.Println(len(files))
 	for _, file := range files {
 		fmt.Println(file)
 		go func(file string) {
@@ -26,7 +26,7 @@ func GetTestMessages(doSomething func([]byte)) {
 			byteValue, err := ioutil.ReadAll(jsonFile)
 			Check(err)
 			doSomething(byteValue)
-			time.Sleep(time.Duration(rand.Int63n(100)) * time.Second)
+			time.Sleep(time.Duration(rand.Int63n(1000)) * time.Second)
 		}(file.Name())
 	}
 }

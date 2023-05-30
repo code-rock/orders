@@ -46,6 +46,7 @@ func Subscribe(fun func(order order.SOrderTable), saveСache func(order SOrder))
 	sub, err := sc.QueueSubscribe("basket", *queueGroup, func(msg *stan.Msg) {
 		// stringData := string(msg.Data)
 		// var dat interface{}
+		fmt.Println(msg)
 		var order_new SOrder
 		var orders []SOrder
 		if err := json.Unmarshal(msg.Data, &order_new); err != nil {
