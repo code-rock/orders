@@ -34,6 +34,35 @@ func (r *Repository) Create(ctx context.Context, order *order.SOrderTable) error
 	return nil
 }
 
+func (r *Repository) FindAll(ctx context.Context) (u []order.SOrderTable, err error) {
+	q := `SELECT order_uid, bin FROM oreder_list;`
+	// r.logger.Trace(fmt.Sprintf("SQL Query: %s", formatQuery(q)))
+
+	rows, err := r.client.Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]order.SOrderTable, 0)
+
+	for rows.Next() {
+		var curr order.SOrderTable
+
+		err = rows.Scan(&curr.ID, &curr.Bin)
+		if err != nil {
+			return nil, err
+		}
+
+		orders = append(orders, curr)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return orders, nil
+}
+
 func NewRepository(client postgresql.SClient, logger interface{}) order.Repository {
 	return &Repository{
 		client: client,

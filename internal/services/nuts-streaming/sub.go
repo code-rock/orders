@@ -15,7 +15,7 @@ import (
 	stan "github.com/nats-io/stan.go"
 )
 
-func Subscribe(fun func(order order.SOrderTable)) {
+func Subscribe(fun func(order order.SOrderTable), saveСache func(order SOrder)) {
 	fmt.Println("ф22Э")
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	var (
@@ -57,6 +57,7 @@ func Subscribe(fun func(order order.SOrderTable)) {
 			} else {
 				fmt.Println(orders)
 				for _, value := range orders {
+					saveСache(value)
 					fun(order.SOrderTable{
 						ID:  value.OrderUID,
 						Bin: msg.Data})
@@ -64,6 +65,7 @@ func Subscribe(fun func(order order.SOrderTable)) {
 			}
 		} else {
 			fmt.Println(order_new)
+			saveСache(order_new)
 			fun(order.SOrderTable{
 				ID:  order_new.OrderUID,
 				Bin: msg.Data})
