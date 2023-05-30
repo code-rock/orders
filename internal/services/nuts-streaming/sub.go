@@ -44,6 +44,7 @@ func Subscribe(saveDB func(order order.SOrderTable), saveСache func(order SOrde
 		saveDB(order.SOrderTable{
 			ID:  new_order.OrderUID,
 			Bin: msg.Data})
+		msg.Ack()
 	}
 
 	// Subscribe to the channel as a queue.
@@ -63,7 +64,7 @@ func Subscribe(saveDB func(order order.SOrderTable), saveСache func(order SOrde
 		} else {
 			saveOrder(order_new, msg)
 		}
-	}, stan.StartWithLastReceived())
+	}, stan.StartWithLastReceived(), stan.SetManualAckMode(), stan.MaxInflight(25))
 	if err != nil {
 		log.Fatal(err)
 	}
