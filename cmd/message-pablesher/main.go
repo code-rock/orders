@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"math/rand"
 	"time"
@@ -46,10 +45,8 @@ func main() {
 
 	// Publish some messages, synchronously
 	sendMessage := func(payload []byte) {
-		fmt.Println(payload)
 		err := sc.Publish("basket", []byte(payload))
 		Check(err)
-
 		time.Sleep(time.Duration(rand.Int63n(5000)) * time.Millisecond)
 	}
 

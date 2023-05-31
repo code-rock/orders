@@ -11,15 +11,15 @@
 
 </style>
 
-<body class="d-flex h-100 text-center text-bg-dark">
-    <div class="row align-items-start">
-        <div class="col navigation">
-            {{range .}} <a href="/{{.}}" onunload="return false">{{.}}</a> {{end}}
+<body class="d-flex h-100 text-center text-bg-dark px-4 py-4">
+    <div class="row align-items-start px-4 py-4">
+        <nav class="col navigation flex-column">
+            {{range .}} <a class="nav-link" href="/{{.}}">{{.}}</a> {{end}}
         </div>
         <div class="col">
-            <div class="card" style="width: 18rem;">
+            <div class="card" style="width: 18rem; height: 80vh;">
                 
-              </div>
+            </div>
         </div>
     </div>
     <script>
@@ -29,24 +29,34 @@
         nav.addEventListener('click', async(e) => {
             e.stopPropagation()
             e.preventDefault()
-            console.log(e.currentTarget.textContent.trim(), 'e.currentTarget.textContent')
-            let response = await fetch(`http://localhost:3003/${e.currentTarget.textContent.trim()}`)
+            console.log(e.target.textContent.trim(), 'e.currentTarget.textContent')
+            let response = await fetch(`http://localhost:3003/${e.target.textContent.trim()}`)
             let data = await response.json();
             console.log(data,'data')
-            let ulEl = document.createElement('ul');
-            Object.values(data.Selected).forEach(item => {
-                if (item instanceof Object) {
-                    card.append(ulEl)
-                    ulEl = document.createElement('ul');
-                    ulEl.classList.add("list-group", "list-group-flush");
-                } else {
-                    let liEl = document.createElement('li');
-                    liEl.textContent = item;
-                    liEl.classList.add("list-group-item");
-                    ulEl.append(liEl)
-                }
-            })
-            card.append(ulEl)
+            card.replaceChildren();
+            
+            function createList(info) { 
+                let ulEl = document.createElement('ul');
+                ulEl.classList.add("list-group", "list-group-flush");
+
+                Object.values(info).forEach(item => {
+                    if (item instanceof Object) {
+                        card.append(ulEl)
+                        createList(item)
+                    } else {
+                        if (item) {
+                            let liEl = document.createElement('li');
+                            liEl.textContent = item;
+                            liEl.classList.add("list-group-item");
+                            ulEl.append(liEl)
+                        }
+                    }
+                })
+
+                card.append(ulEl)
+            }    
+
+            createList(data.Selected)
         })
     </script>
    

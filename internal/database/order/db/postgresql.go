@@ -5,6 +5,7 @@ import (
 	"basket/internal/database/postgresql"
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/jackc/pgconn"
 )
@@ -36,7 +37,7 @@ func (r *Repository) Create(ctx context.Context, order *order.SOrderTable) error
 
 func (r *Repository) FindAll(ctx context.Context) (u []order.SOrderTable, err error) {
 	q := `SELECT order_uid, bin FROM oreder_list;`
-	// r.logger.Trace(fmt.Sprintf("SQL Query: %s", formatQuery(q)))
+	log.Printf("SQL Query: %s", q)
 
 	rows, err := r.client.Query(ctx, q)
 	if err != nil {

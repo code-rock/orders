@@ -12,14 +12,12 @@ func GetTestMessages(doSomething func([]byte)) {
 	dir := "./test-data"
 	files, err := ioutil.ReadDir(dir)
 	Check(err)
-	fmt.Println(len(files))
+	
 	for _, file := range files {
-		fmt.Println(file)
+		
 		go func(file string) {
-			data, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file))
+			_, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file))
 			Check(err)
-			fmt.Print(data)
-
 			jsonFile, err := os.Open(fmt.Sprintf("%s/%s", dir, file))
 			Check(err)
 			defer jsonFile.Close()
