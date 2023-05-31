@@ -52,6 +52,5 @@ func main() {
 	for {
 		i++
 		GetTestMessages(sendMessage)
-		time.Sleep(time.Duration(rand.Int63n(10)) * time.Second)
 	}
 }

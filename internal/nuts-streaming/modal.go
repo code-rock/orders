@@ -1,6 +1,6 @@
 package streaming
 
-type SItems struct {
+type SItem struct {
 	ChrtID      int    `json:"chrt_id"`
 	TrackNumber string `json:"track_number"`
 	Price       int    `json:"price"`
@@ -43,7 +43,7 @@ type SOrder struct {
 	Entry           string    `json:"entry"`
 	Delivery        SDelivery `json:"delivery"`
 	Payment         SPayment  `json:"payment"`
-	Items           []SItems  `json:"items"`
+	Items           []SItem   `json:"items"`
 	Locale          string    `json:"locale"`
 	Internal        string    `json:"internal_signature"`
 	CustomerID      string    `json:"customer_id"`

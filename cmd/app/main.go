@@ -1,16 +1,16 @@
 package main
 
 import (
+	"context"
 	env "order-list/internal/config"
 	"order-list/internal/database/order"
 	"order-list/internal/database/postgresql"
-	"context"
 	"os/signal"
 	"syscall"
 	"time"
 
-	streaming "order-list/internal/nuts-streaming"
 	"encoding/json"
+	streaming "order-list/internal/nuts-streaming"
 
 	"html/template"
 	"log"
@@ -37,6 +37,7 @@ type SPageOrder struct {
 
 func main() {
 	var cache sync.Map
+	var keys sync.Map
 	conf := env.New()
 	ctx := context.TODO()
 
@@ -67,10 +68,6 @@ func main() {
 		}
 	}
 
-	saveСache := func(order streaming.SOrder) {
-		cache.Store(order.OrderUID, order)
-	}
-
 	getCacheKeys := func() (Keys []interface{}) {
 		cache.Range(func(k, v interface{}) bool {
 			Keys = append(Keys, k)
@@ -79,9 +76,15 @@ func main() {
 		return Keys
 	}
 
+	saveСache := func(order streaming.SOrder) {
+		cache.Store(order.OrderUID, order)
+		keys.Store("arr", getCacheKeys())
+	}
+
 	showHomePage := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		keysArr, _ := keys.Load("arr")
 		tmpl, _ := template.ParseFiles("internal/templates/home_page.html")
-		tmpl.Execute(w, getCacheKeys())
+		tmpl.Execute(w, keysArr)
 	}
 
 	sendOrderJsonById := func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -89,21 +92,23 @@ func main() {
 		val, ok := cache.Load(id)
 
 		if ok {
-			data := SPageOrder{
-				Id:       id,
-				Keys:     getCacheKeys(),
-				Selected: val,
-			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(data)
+			json.NewEncoder(w).Encode(val)
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
 	}
 
+	refreshKeysJson := func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		keysArr, _ := keys.Load("arr")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(keysArr)
+	}
+
 	router := httprouter.New()
 	router.GET("/", showHomePage)
-	router.GET("/:id", sendOrderJsonById)
+	router.GET("/keys/", refreshKeysJson)
+	router.GET("/order/:id/", sendOrderJsonById)
 
 	srv := &http.Server{
 		Addr:    ":3003",

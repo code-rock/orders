@@ -9,45 +9,68 @@
 </head>
 <body class="d-flex h-100 text-center text-bg-dark px-4 py-4">
     <div class="row align-items-start px-4 py-4">
-        <nav class="col navigation flex-column">
-            {{range .}} <a class="nav-link" href="/{{.}}">{{.}}</a> {{end}}
-        </div>
         <div class="col">
             <div class="card" style="width: 18rem; height: 80vh;"></div>
         </div>
+        <nav class="col navigation flex-column">
+            {{range .}} <a class="nav-link" href="/{{.}}">{{.}}</a> {{end}}
+        </div>
     </div>
     <script>
-        const nav = document.querySelector('.navigation')
-        const card = document.querySelector('.card')
+        document.addEventListener("DOMContentLoaded", (event) => {
+            const nav = document.querySelector('.navigation')
+            const card = document.querySelector('.card')
 
-        nav.addEventListener('click', async(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            let response = await fetch(`http://localhost:3003/${e.target.textContent.trim()}`)
-            let data = await response.json();
-            card.replaceChildren();
-            
             function createList(info) { 
-                let ulEl = document.createElement('ul');
-                ulEl.classList.add("list-group", "list-group-flush");
+                    let ulEl = document.createElement('ul');
+                    ulEl.classList.add("list-group", "list-group-flush");
 
-                Object.values(info).forEach(item => {
-                    if (item instanceof Object) {
-                        card.append(ulEl)
-                        createList(item)
-                    } else {
-                        if (item) {
-                            let liEl = document.createElement('li');
-                            liEl.textContent = item;
-                            liEl.classList.add("list-group-item");
-                            ulEl.append(liEl)
+                    Object.values(info).forEach(item => {
+                        if (item instanceof Object) {
+                            card.append(ulEl)
+                            createList(item)
+                        } else {
+                            if (item) {
+                                let liEl = document.createElement('li');
+                                liEl.textContent = item;
+                                liEl.classList.add("list-group-item");
+                                ulEl.append(liEl)
+                            }
                         }
-                    }
-                })
-                card.append(ulEl)
+                    })
+                    card.append(ulEl)
             }    
-            createList(data.Selected)
-        })
+
+            nav.addEventListener('click', async(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                let response = await fetch(`http://localhost:3003/order/${e.target.textContent.trim()}/`)
+                let data = await response.json(); 
+                if (data) {
+                    card.replaceChildren();
+                    createList(data)
+                }
+            })
+
+            let arr = "{{.}}"
+           
+            const refreshKeys = setInterval(async() => {
+                let response = await fetch(`http://localhost:3003/keys/`)
+                let data = await response.json();
+                if (data && arr.length !== data.length) {
+                    arr = data;
+                    nav.replaceChildren();
+
+                    data.forEach(key => {
+                        let link = document.createElement('a');
+                        link.textContent = key;
+                        link.classList.add("nav-link");
+                        link.setAttribute("href", `/${key}`);
+                        nav.append(link)
+                    })
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>
