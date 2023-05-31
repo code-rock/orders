@@ -29,12 +29,6 @@ func init() {
 	}
 }
 
-type SPageOrder struct {
-	Id       string
-	Keys     []interface{}
-	Selected interface{}
-}
-
 func main() {
 	var cache sync.Map
 	var keys sync.Map
