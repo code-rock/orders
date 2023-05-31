@@ -1,10 +1,10 @@
 package streaming
 
 import (
-	order "basket/internal/database/order"
 	"encoding/json"
 	"flag"
 	"log"
+	order "order-list/internal/database/order"
 	"os"
 	"os/signal"
 
@@ -29,7 +29,7 @@ func Subscribe(saveDB func(order order.SOrderTable), saveСache func(order SOrde
 	// Connect to NATS Streaming Server cluster
 	sc, err := stan.Connect(*clusterID, *clientID,
 		stan.NatsURL(*url),
-		stan.Pings(10, 5),
+		stan.Pings(10, 10),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
 			log.Printf("Connection lost: %v", reason)
 		}),
@@ -48,8 +48,8 @@ func Subscribe(saveDB func(order order.SOrderTable), saveСache func(order SOrde
 	}
 
 	// Subscribe to the channel as a queue.
-	// Start with new messages as they come in; don't replay earlier messages.
-	sub, err := sc.QueueSubscribe("basket", *queueGroup, func(msg *stan.Msg) {
+	// Start with new messages as they come in; replay manual earlier messages.
+	sub, err := sc.QueueSubscribe("orders", *queueGroup, func(msg *stan.Msg) {
 		var order_new SOrder
 		var orders []SOrder
 		if err := json.Unmarshal(msg.Data, &order_new); err != nil {
@@ -64,7 +64,7 @@ func Subscribe(saveDB func(order order.SOrderTable), saveСache func(order SOrde
 		} else {
 			saveOrder(order_new, msg)
 		}
-	}, stan.StartWithLastReceived(), stan.SetManualAckMode(), stan.MaxInflight(25))
+	}, stan.StartWithLastReceived(), stan.SetManualAckMode())
 	if err != nil {
 		log.Fatal(err)
 	}

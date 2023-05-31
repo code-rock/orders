@@ -14,22 +14,12 @@ type SDBConfig struct {
 	DBName   string
 }
 
-type SGitHubConfig struct {
-	Username string
-	APIKey   string
-}
-
 type Config struct {
-	GitHub SGitHubConfig
-	BD     SDBConfig
+	BD SDBConfig
 }
 
 func New() *Config {
 	return &Config{
-		GitHub: SGitHubConfig{
-			Username: getEnv("GITHUB_USERNAME", ""),
-			APIKey:   getEnv("GITHUB_API_KEY", ""),
-		},
 		BD: SDBConfig{
 			Host:     getEnv("POSTGRE_SQL_HOST", ""),
 			Port:     getEnvAsInt("POSTGRE_SQL_PORT", 5432),

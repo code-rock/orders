@@ -1,4 +1,4 @@
-module basket
+module order-list
 
 go 1.20
 

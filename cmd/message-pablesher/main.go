@@ -10,12 +10,6 @@ import (
 	stan "github.com/nats-io/stan.go"
 )
 
-func Check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -45,8 +39,12 @@ func main() {
 
 	// Publish some messages, synchronously
 	sendMessage := func(payload []byte) {
-		err := sc.Publish("basket", []byte(payload))
-		Check(err)
+		err := sc.Publish("orders", []byte(payload))
+		if err != nil {
+			log.Print(err)
+		} else {
+			log.Print(payload)
+		}
 		time.Sleep(time.Duration(rand.Int63n(5000)) * time.Millisecond)
 	}
 

@@ -1,16 +1,15 @@
 package main
 
 import (
-	env "basket/internal/config"
-	"basket/internal/database/order"
-	dbOrder "basket/internal/database/order/db"
-	"basket/internal/database/postgresql"
+	env "order-list/internal/config"
+	"order-list/internal/database/order"
+	"order-list/internal/database/postgresql"
 	"context"
 	"os/signal"
 	"syscall"
 	"time"
 
-	streaming "basket/internal/services/nuts-streaming"
+	streaming "order-list/internal/nuts-streaming"
 	"encoding/json"
 
 	"html/template"
@@ -45,7 +44,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	repository := dbOrder.NewRepository(postgreSQLClient, nil)
+	repository := order.NewRepository(postgreSQLClient, nil)
 
 	u, err := repository.FindAll(ctx)
 	if err != nil {
@@ -80,12 +79,12 @@ func main() {
 		return Keys
 	}
 
-	Index := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	showHomePage := func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		tmpl, _ := template.ParseFiles("internal/templates/home_page.html")
 		tmpl.Execute(w, getCacheKeys())
 	}
 
-	Hello := func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	sendOrderJsonById := func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		id := ps.ByName("id")
 		val, ok := cache.Load(id)
 
@@ -103,8 +102,8 @@ func main() {
 	}
 
 	router := httprouter.New()
-	router.GET("/", Index)
-	router.GET("/:id", Hello)
+	router.GET("/", showHomePage)
+	router.GET("/:id", sendOrderJsonById)
 
 	srv := &http.Server{
 		Addr:    ":3003",
@@ -125,7 +124,6 @@ func main() {
 	}()
 
 	log.Print("Server Started")
-
 	<-done
 	log.Print("Server Stopped")
 
@@ -137,6 +135,6 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server Shutdown Failed:%+v", err)
 	}
-	log.Print("Server Exited Properly")
 
+	log.Print("Server Exited Properly")
 }
